@@ -4,7 +4,11 @@ const bcrypt = require("bcryptjs");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const userMiddleWare = require("./validation");
+const auth = require('./auth');
+const passport = require("passport");
 
+// router.use(passport.initialize());
+// router.use(passport.session());
 
 router.get("/", async (req, res) => {
     const users = await loadUserCollection();
@@ -37,6 +41,22 @@ router.post("/register", async (req, res) => {
     });
     res.send("inserted");
 });
+
+router.get("/login/facebook", passport.authenticate('facebook'), (req, res) =>{
+    res.send(req.asd)
+});
+
+router.get("/welcome", auth.ensureAuthenticated, (req, res) =>{
+    console.log("Welcome: ")
+    console.log(req.user)
+    res.send("Hello " + req.user.displayName)
+});
+
+router.get('/auth/facebook/callback',
+  passport.authenticate('facebook', { successRedirect: '/user/welcome',
+                                      failureRedirect: '/login' })
+                                      );
+
 
 router.post("/login", async (req, res) => {
     let password = req.body.password;
